@@ -1,0 +1,56 @@
+---
+  - hosts: metabase_server
+    tasks:
+
+    - name: Installing packages
+      apt:
+        name:
+          - openjdk-8-jre
+
+    - name: Create metabase directory if it does not exist
+      file:
+        path: /opt/metabase/
+        state: directory
+        mode: '0755'
+
+    - name: Download jar
+      get_url:
+        url: http://downloads.metabase.com/v0.32.9/metabase.jar
+        dest: /opt/metabase/
+
+    - name: Ensure group "appmgr" exists
+      group:
+        name: appmgr
+        state: present
+        system: yes
+
+    - name: Add the user 'jvmapps' and add to appmgr group
+      user:
+        name: jvmapps
+        shell: /bin/false
+        groups: appmgr
+        append: yes
+        system: yes
+
+    - name: Template a file to /etc/systemd/system/metabase.service
+      template:
+        src: Templates/systemd/metabase.service
+        dest: /etc/systemd/system/metabase.service
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Change permisions to /opt/metabase/
+      file:
+        path: /opt/metabase/
+        state: directory
+        recurse: yes
+        owner: jvmapps
+        group: appmgr
+
+    - name: restart service cron on centos, in all cases, also issue daemon-reload to pick up config changes
+      systemd:
+        state: restarted
+        daemon_reload: yes
+        name: metabase.service
+        enabled: yes

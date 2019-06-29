@@ -1,0 +1,13 @@
+[Unit]
+Description=Metabase Service
+
+[Service]
+WorkingDirectory=/opt/metabase
+ExecStart=/usr/bin/java -jar metabase.jar
+User=jvmapps
+Type=simple
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
