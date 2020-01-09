@@ -1,5 +1,4 @@
 ---
-  - hosts: metabase_server
     tasks:
 
     - name: Installing packages
